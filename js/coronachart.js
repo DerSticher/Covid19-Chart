@@ -19,6 +19,7 @@ function StoreDataInObject(object, csvData) {
             object[name] = element.slice(4);
         }
     }
+
 }
 
 function StoreLabels(csvData) {
@@ -91,8 +92,8 @@ function CreateDataset(label, data, color) {
 
 function SetCDRGraph(countryName) {
     _coronaChart.data.datasets = [
-        CreateDataset('Confirmed', _confirmedPerCountry[countryName], 'rgba(0, 0, 255, 0.3)'),
-        CreateDataset('Deaths', _deathsPerCountry[countryName], 'rgba(255, 0, 0, 0.3)'),
+        CreateDataset('Confirmed', _confirmedPerCountry[countryName], 'rgba(40, 40, 255, 0.3)'),
+        CreateDataset('Deaths', _deathsPerCountry[countryName], 'rgba(255, 40, 40, 0.3)'),
         CreateDataset('Recovered', _recoveredPerCountry[countryName], 'rgba(0, 255, 0, 0.3)')
     ];
     _coronaChart.update();
@@ -133,9 +134,9 @@ function CreateChart(labels) {
             scales: {
                 yAxes: [{
                     ticks: {
-                        beginAtZero: false,
-                        precision: 1
-                    }
+                        beginAtZero: true
+                    },
+                    type: 'linear'
                 }]
             }
         }
@@ -159,6 +160,21 @@ $(document).ready(function() {
         } else {
             // RemoveCountryData(country);
         }
+    });
+
+    $('#logarithmic-toggle').bootstrapToggle({
+        on: 'Logarithmic',
+        off: 'Linear',
+        offstyle: 'info'
+    });
+
+    $('#logarithmic-toggle').change(function() {
+        if ($('#logarithmic-toggle').prop('checked')) {
+            _coronaChart.options.scales.yAxes[0].type = 'logarithmic';
+        } else {
+            _coronaChart.options.scales.yAxes[0].type = 'linear';
+        }
+        _coronaChart.update();
     });
 
     Papa.parse("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv", 
