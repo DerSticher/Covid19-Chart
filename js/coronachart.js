@@ -150,17 +150,14 @@ function GetCountryFromGET() {
 }
 
 function CheckStartCountry() {
-    console.log("check 1");
     if (_dataReceived < 3) {
         return;
     }
 
     let country = GetCountryFromGET();
-    console.log(country);
     if (!country) {
         return;
     }
-    console.log("check 2");
 
     $('#country-select').selectpicker('val', country);
     SetCDRGraph(country);
