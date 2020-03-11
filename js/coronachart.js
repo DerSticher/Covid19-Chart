@@ -79,26 +79,21 @@ function UpdateChartColors() {
     _coronaChart.update();
 }
 
+function CreateDataset(label, data, color) {
+    return {
+        label: label,
+        data: data,
+        borderWidth: 1,
+        lineTension: 0,
+        backgroundColor: color
+    }
+}
+
 function SetCDRGraph(countryName) {
     _coronaChart.data.datasets = [
-        {
-            label: 'Confirmed',
-            data: _confirmedPerCountry[countryName],
-            borderWidth: 1,
-            backgroundColor: 'rgba(0, 0, 255, 0.3)'
-        },
-        {
-            label: 'Deaths',
-            data: _deathsPerCountry[countryName],
-            borderWidth: 1,
-            backgroundColor: 'rgba(255, 0, 0, 0.3)'
-        },
-        {
-            label: 'Recovered',
-            data: _recoveredPerCountry[countryName],
-            borderWidth: 1,
-            backgroundColor: 'rgba(0, 255, 0, 0.3)'
-        }
+        CreateDataset('Confirmed', _confirmedPerCountry[countryName], 'rgba(0, 0, 255, 0.3)'),
+        CreateDataset('Deaths', _deathsPerCountry[countryName], 'rgba(255, 0, 0, 0.3)'),
+        CreateDataset('Recovered', _recoveredPerCountry[countryName], 'rgba(0, 255, 0, 0.3)')
     ];
     _coronaChart.update();
 }
