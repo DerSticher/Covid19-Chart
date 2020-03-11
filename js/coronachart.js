@@ -2,6 +2,7 @@ var _coronaChart = {};
 var _confirmedPerCountry = {};
 var _deathsPerCountry = {};
 var _recoveredPerCountry = {};
+var _increasePerCountry = {};
 var _countries = [];
 var _labels = [];
 var _colors = ['rgba(255, 99, 132, 0.3)', 'rgba(132, 99, 255, 0.3)', 'rgba(132, 255, 99, 0.3)', 'rgba(255, 132, 99, 0.3)', 'rgba(255, 99, 132, 0.3)']
@@ -57,6 +58,26 @@ function StoreRecoveredPerCountry(csvData) {
     StoreDataInObject(_recoveredPerCountry, csvData);
 }
 
+function CalculateIncrease() {
+    _increasePerCountry = {};
+
+    for (let index = 0; index < _countries.length; index++) {
+        const country = _countries[index];
+        const confirmed = _confirmedPerCountry[country];
+        let last = confirmed[0];
+        _increasePerCountry[country] = [];
+        
+        for (let confirmedIndex = 1; confirmedIndex < confirmed.length; confirmedIndex++) {
+            const element = confirmed[confirmedIndex];
+
+            if (last > 0) {
+                _increasePerCountry[country][confirmedIndex] = 100 * (element - last) / last;
+            }
+            last = element;
+        }
+    }
+}
+
 function UpdateCountrySelect(_countries) {
     let select = $("#country-select");
     select.contents().remove();
@@ -81,21 +102,36 @@ function UpdateChartColors() {
     _coronaChart.update();
 }
 
-function CreateDataset(label, data, color) {
+function CreatePeopleDataset(label, data, color) {
     return {
         label: label,
         data: data,
         borderWidth: 1,
         lineTension: 0,
-        backgroundColor: color
+        backgroundColor: color,
+        yAxisID: 'left-y-axis'
+    }
+}
+
+function CreatePercentageDataset(label, data, color) {
+    return {
+        label: label,
+        data: data,
+        borderWidth: 2,
+        fill: false,
+        lineTension: 0,
+        borderColor: color,
+        hidden: true,
+        yAxisID: 'right-y-axis'
     }
 }
 
 function SetCDRGraph(countryName) {
     _coronaChart.data.datasets = [
-        CreateDataset('Confirmed', _confirmedPerCountry[countryName], 'rgba(40, 40, 255, 0.3)'),
-        CreateDataset('Deaths', _deathsPerCountry[countryName], 'rgba(255, 40, 40, 0.3)'),
-        CreateDataset('Recovered', _recoveredPerCountry[countryName], 'rgba(0, 255, 0, 0.3)')
+        CreatePeopleDataset('Confirmed', _confirmedPerCountry[countryName], 'rgba(40, 40, 255, 0.3)'),
+        CreatePeopleDataset('Deaths', _deathsPerCountry[countryName], 'rgba(255, 0, 0, 0.3)'),
+        CreatePeopleDataset('Recovered', _recoveredPerCountry[countryName], 'rgba(0, 255, 0, 0.3)'),
+        CreatePercentageDataset('Increase in %', _increasePerCountry[countryName], 'rgb(42, 128, 42)')
     ];
     _coronaChart.update();
 }
@@ -127,18 +163,39 @@ function CreateChart(labels) {
 
     _coronaChart = new Chart(ctx, {
         type: 'line',
+        fill: true,
         data: {
             labels: labels,
             datasets: [] 
         },
         options: {
             scales: {
-                yAxes: [{
+                yAxes: [
+                {
+                    id: 'left-y-axis',
+                    scaleLabel: {
+                        display: true,
+                        labelString: '# of people'
+                    },
                     ticks: {
                         beginAtZero: true
                     },
-                    type: 'linear'
-                }]
+                    type: 'linear',
+                    position: 'left'
+                },
+                {
+                    id: 'right-y-axis',
+                    scaleLabel: {
+                        display: true,
+                        labelString: '%'
+                    },
+                    ticks: {
+                        min: 0
+                    },
+                    type: 'linear',
+                    position: 'right'
+                }
+            ]
             }
         }
     });
@@ -213,6 +270,7 @@ $(document).ready(function() {
                 StoreLabels(data);
                 StoreCountries(data);
                 StoreConfirmedPerCountry(data);
+                CalculateIncrease();
                 UpdateCountrySelect(_countries);
                 CreateChart(_labels);
                 _dataReceived++;
