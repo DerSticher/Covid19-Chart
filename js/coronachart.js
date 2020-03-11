@@ -1,10 +1,11 @@
-_coronaChart = {};
-_confirmedPerCountry = {};
-_deathsPerCountry = {};
-_recoveredPerCountry = {};
-_countries = [];
-_labels = [];
-_colors = ['rgba(255, 99, 132, 0.3)', 'rgba(132, 99, 255, 0.3)', 'rgba(132, 255, 99, 0.3)', 'rgba(255, 132, 99, 0.3)', 'rgba(255, 99, 132, 0.3)']
+var _coronaChart = {};
+var _confirmedPerCountry = {};
+var _deathsPerCountry = {};
+var _recoveredPerCountry = {};
+var _countries = [];
+var _labels = [];
+var _colors = ['rgba(255, 99, 132, 0.3)', 'rgba(132, 99, 255, 0.3)', 'rgba(132, 255, 99, 0.3)', 'rgba(255, 132, 99, 0.3)', 'rgba(255, 99, 132, 0.3)']
+var _dataReceived = 0;
 
 function StoreDataInObject(object, csvData) {
     for (let index = 0; index < csvData.length; index++) {
@@ -143,6 +144,33 @@ function CreateChart(labels) {
     });
 }
 
+function GetCountryFromGET() {
+    const url = new URL(window.location);
+    return url.searchParams.get("country");
+}
+
+function CheckStartCountry() {
+    console.log("check 1");
+    if (_dataReceived < 3) {
+        return;
+    }
+
+    let country = GetCountryFromGET();
+    console.log(country);
+    if (!country) {
+        return;
+    }
+    console.log("check 2");
+
+    $('#country-select').selectpicker('val', country);
+    SetCDRGraph(country);
+}
+
+function UpdateURL(country) {
+    let url = window.location.href.split('?')[0];
+    window.history.replaceState({}, document.title, url + "?country=" + country);
+}
+
 $(document).ready(function() {
     $('#country-select').selectpicker();
     $('#country-select').on('changed.bs.select', function(e, clickedIndex, isSelected, previousValue) {
@@ -155,6 +183,7 @@ $(document).ready(function() {
                 // RemoveCountryData(previousValue);
             }
 
+            UpdateURL(country);
             SetCDRGraph(country);
             // AddCountryData(country);
         } else {
@@ -189,6 +218,8 @@ $(document).ready(function() {
                 StoreConfirmedPerCountry(data);
                 UpdateCountrySelect(_countries);
                 CreateChart(_labels);
+                _dataReceived++;
+                CheckStartCountry();
             }
         }
     );
@@ -200,6 +231,8 @@ $(document).ready(function() {
             complete: function(results) {
                 console.log("Retrieved deaths");
                 StoreDeathsPerCountry(results.data);
+                _dataReceived++;
+                CheckStartCountry();
             }
         }
     );
@@ -211,6 +244,8 @@ $(document).ready(function() {
             complete: function(results) {
                 console.log("Retrieved recovered");
                 StoreRecoveredPerCountry(results.data);
+                _dataReceived++;
+                CheckStartCountry();
             }
         }
     );
