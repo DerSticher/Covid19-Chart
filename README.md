@@ -9,3 +9,5 @@ A simple page for visualisation of covid19 development per country
 * Bootstraptoggle (https://www.bootstraptoggle.com/)
 * JQuery (https://jquery.com/)
 * PopperJS (https://popper.js.org/)
+
+Link to actual chart: https://dersticher.github.io/Covid19-Chart/
