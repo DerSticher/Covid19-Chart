@@ -1,5 +1,7 @@
 # Covid19-Chart
-A simple page for visualisation of covid19 development per country
+A simple page for visualisation of covid19 development per country.
+
+View the chart here: https://dersticher.github.io/Covid19-Chart/
 
 # Third party projects used
 * ChartJS (https://www.chartjs.org/)
@@ -9,5 +11,3 @@ A simple page for visualisation of covid19 development per country
 * Bootstraptoggle (https://www.bootstraptoggle.com/)
 * JQuery (https://jquery.com/)
 * PopperJS (https://popper.js.org/)
-
-Link to actual chart: https://dersticher.github.io/Covid19-Chart/
