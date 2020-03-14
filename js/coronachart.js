@@ -43,6 +43,29 @@ function StoreCountries(csvData) {
     _countries.sort();
 }
 
+function CalculateWorldData() {
+    _confirmedPerCountry['World'] = [];
+    _deathsPerCountry['World'] = [];
+    _recoveredPerCountry['World'] = [];
+    
+    for (let index = 0; index < _countries.length; index++) {
+        const country = _countries[index];
+        for (let dayIndex = 0; dayIndex < _confirmedPerCountry[country].length; dayIndex++) {
+            if (dayIndex in _confirmedPerCountry['World']) {
+                _confirmedPerCountry['World'][dayIndex] += _confirmedPerCountry[country][dayIndex];
+                _deathsPerCountry['World'][dayIndex] += _deathsPerCountry[country][dayIndex]; 
+                _recoveredPerCountry['World'][dayIndex] += _recoveredPerCountry[country][dayIndex];
+            } else {
+                _confirmedPerCountry['World'][dayIndex] = _confirmedPerCountry[country][dayIndex];
+                _deathsPerCountry['World'][dayIndex] = _deathsPerCountry[country][dayIndex]; 
+                _recoveredPerCountry['World'][dayIndex] = _recoveredPerCountry[country][dayIndex];
+            }
+        }
+    }
+
+    _countries.unshift('World');
+}
+
 function StoreConfirmedPerCountry(csvData) {
     _confirmedPerCountry = {};
     StoreDataInObject(_confirmedPerCountry, csvData);
@@ -127,6 +150,7 @@ function CreatePercentageDataset(label, data, color) {
 }
 
 function SetCDRGraph(countryName) {
+    console.log(_confirmedPerCountry[countryName]);
     _coronaChart.data.datasets = [
         CreatePeopleDataset('Confirmed', _confirmedPerCountry[countryName], 'rgba(40, 40, 255, 0.3)'),
         CreatePeopleDataset('Deaths', _deathsPerCountry[countryName], 'rgba(255, 0, 0, 0.3)'),
@@ -211,9 +235,14 @@ function CheckStartCountry() {
         return;
     }
 
+    CalculateWorldData();
+    CalculateIncrease();
+    UpdateCountrySelect(_countries);
+
     let country = GetCountryFromGET();
+
     if (!country) {
-        return;
+        country = 'World';
     }
 
     $('#country-select').selectpicker('val', country);
@@ -270,8 +299,6 @@ $(document).ready(function() {
                 StoreLabels(data);
                 StoreCountries(data);
                 StoreConfirmedPerCountry(data);
-                CalculateIncrease();
-                UpdateCountrySelect(_countries);
                 CreateChart(_labels);
                 _dataReceived++;
                 CheckStartCountry();
